@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from generator.models import Player, Hero
+from anomaly import AnomalyKind
 
 @dataclass(frozen=True, slots=True)
 class DotaProfile:
@@ -65,22 +66,23 @@ class DotaProfile:
     gpm_noise_std: float = 80.0
     xpm_noise_std: float = 70.0
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class MatchContext:
     at: datetime
     player: Player
     hero: Hero
 
-    mmr_delta: int
+    mmr_delta: int = 0
     mmr_before: int = 0
     result: bool = False
     kills: int = 0
     deaths: int = 0
     assists: int = 0
 
-    gpm: float
-    xpm: float
-    match_time: timedelta
+    gpm: float = 0
+    xpm: float = 0
+    match_time: timedelta = timedelta(0)
+    anomaly: AnomalyKind | None = None
 
 
 def _clamp(value: float, low: float, high: float) -> float:
@@ -101,7 +103,7 @@ class MmrBeforeSample(MetricSampler):
         region = ctx.player.region
         base = self._profile.region_mmr_mean.get(region)
         noise = rng.gauss(0, self._profile.mmr_noise_std)
-        return int(_clamp(base + noise, 0, 12000))
+        return int(_clamp(base + noise, 0, 14000))
 
 
 class ResultsSample(MetricSampler):
@@ -113,7 +115,6 @@ class ResultsSample(MetricSampler):
         p = _clamp(p, 0.05, 0.95)
         return rng.random() < p
         
-
 
 class KillsSample(MetricSampler): 
     def __init__(self, profile: DotaProfile) -> None:
@@ -202,7 +203,7 @@ class MatchTimeSampler(MetricSampler):
         win_bonus = 3.0 if ctx.result else -3.0
         
         noise = rng.gauss(0, self._profile.match_time_std_min)
-\
+
         minutes = _clamp(
             base + win_bonus + noise,
             self._profile.match_time_min_min,   # 20

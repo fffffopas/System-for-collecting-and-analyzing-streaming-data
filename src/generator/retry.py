@@ -30,6 +30,8 @@ class RetryPolicy():
         self._max_delay = max_delay
         self._backoff_factor = backoff_factor
         self._jitter = jitter
+        if not callable(sleep):
+            raise TypeError("sleep должен быть вызываемым")
         self._sleep = sleep
 
         def execute(self, fn: Callable[[], T]) -> T:
