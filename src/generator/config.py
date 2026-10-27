@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from functools import lru_cache
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
@@ -5,7 +8,7 @@ class ClickHouseSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="CLICKHOUSE_", env_file=".env",
         extra="ignore",
-        case_sentension=False
+        case_sensetive=False #sentension -> sensetive
     )
 
     host: str = Field(default="127.0.0.1")
@@ -18,17 +21,17 @@ class GeneratorSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="GENERATOR_", env_file=".env",
         extra="ignore",
-        ase_sentension=False
+        сase_sensetive=False #sentension -> sensetive
     )
 
     batch_size: int = Field(default=1000, ge=1)
     interval_seconds: float = Field(default=1.0, ge=0.0)
-    seed: int - Field(default=42)
+    seed: int = Field(default=42)
 
     anomaly_probability: float = Field(default=0.02, ge=0.0, le=1.0)
     anomaly_strength: float = Field(default=1.0, ge=0.0, le=1.0)
 
-    log_level: str = Field(default="info")
+    log_level: str = Field(default="INFO") # info -> INFO
 
     retry_max_attempts: int = Field(default=5, ge=1)
     retru_base_delay: float = Field(default=0.5, ge=0.0)
