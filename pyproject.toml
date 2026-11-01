@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "ShurikShurensky", email = "anufrievaleksandr05@gmail.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "chdb>=4.4.0",
     "pydantic-settings>=2.15.0",
