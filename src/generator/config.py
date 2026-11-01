@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class ClickHouseSettings(BaseSettings):
     model_config = SettingsConfigDict(

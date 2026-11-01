@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import random
 import time
+from datetime import UTC, datetime, timedelta
 
-from datetime import datetime, timedelta, timezone
-from generator.config import get_settings 
-from generator.models import Player, Hero, TableFacts
-from generator.generation.metrics import DotaProfile, _clamp
+from generator.config import get_settings
+from generator.generation import defaults
 from generator.generation.anomaly import AnomalyPolicy
 from generator.generation.match_generator import MatchGenerator
-from generator.generation import defaults
-
+from generator.generation.metrics import DotaProfile, _clamp
+from generator.models import Hero, Player
 
 COUNTRY_BY_REGION = {"EU": "DE", "NA": "US", "SEA": "SG", "CN": "CN", "SA": "BR", "CIS": "KZ"}
 PLAYERS_COUNT = 500
@@ -50,7 +49,7 @@ def main():
 
     try:
         while True:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             batch = [generator.generate(rng.choice(players), rng.choice(heroes), now) for _ in range(cfg.batch_size)]
             # Запись в ClickHouse
             print(batch)

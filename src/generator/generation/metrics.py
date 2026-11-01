@@ -5,9 +5,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from generator.models import Player, Hero
 from generator.generation import defaults
-from generator.generation.anomaly import AnomalyKind # указал корректный импорт
+from generator.generation.anomaly import AnomalyKind  # указал корректный импорт
+from generator.models import Hero, Player
+
 
 @dataclass(frozen=True, slots=True)
 class DotaProfile:
@@ -118,7 +119,7 @@ class KillsSample(MetricSampler):
         multiplier = 1.3 if ctx.result else 0.8
         noise = rng.gauss(0, 2.0)
         value = base * multiplier + noise
-        return max(0, int(round(value)))
+        return max(0, round(value))
 
 
 class DeathsSample(MetricSampler):
@@ -130,7 +131,7 @@ class DeathsSample(MetricSampler):
         base = self._profile.role_deaths_base[role]
         multiplier = 0.8 if ctx.result else 1.3
         noise = rng.gauss(0, 1.5)
-        return max(0, int(round(base * multiplier + noise)))
+        return max(0, round(base * multiplier + noise))
 
 class AssistsSample(MetricSampler):
     def __init__(self, profile: DotaProfile) -> None:
@@ -141,7 +142,7 @@ class AssistsSample(MetricSampler):
         base = self._profile.role_assists_base[role]
         multiplier = 1.2 if ctx.result else 0.9
         noise = rng.gauss(0, 2.0)
-        return max(0, int(round(base * multiplier + noise)))
+        return max(0, round(base * multiplier + noise))
 
 class MmrDeltaSample(MetricSampler):
     
@@ -160,7 +161,7 @@ class MmrDeltaSample(MetricSampler):
             kda_bonus = -kda_bonus
         noise = rng.gauss(0, self._profile.mmr_delta_std)
         
-        return int(round(base + kda_bonus + noise))
+        return round(base + kda_bonus + noise)
 
 class GpmSampler(MetricSampler):
     

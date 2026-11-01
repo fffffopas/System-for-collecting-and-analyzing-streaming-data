@@ -2,26 +2,26 @@ from __future__ import annotations
 
 import random
 from datetime import datetime
-from dataclasses import replace
 
-from generator.models import Player, Hero, TableFacts
+from generator.models import Hero, Player, TableFacts
 
 from .anomaly import AnomalyKind, AnomalyPolicy
 from .metrics import (
+    AssistsSample,
+    DeathsSample,
     DotaProfile,
-    SideSampler,
-    RoleSampler,
+    GpmSampler,
+    KillsSample,
+    MatchContext,
+    MatchTimeSampler,
+    MetricSampler,
     MmrDeltaSample,
     ResultsSample,
-    KillsSample,
-    DeathsSample,
-    AssistsSample,
-    GpmSampler,
+    RoleSampler,
+    SideSampler,
     XpmSampler,
-    MatchTimeSampler,
-    MatchContext,
-    MetricSampler
 )
+
 
 class MatchGenerator: # Mathc -> Match
     def __init__(
