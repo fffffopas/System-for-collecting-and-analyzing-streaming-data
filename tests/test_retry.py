@@ -20,7 +20,7 @@ def test_retries_then_succeeds():
     slept = []
     policy = RetryPolicy(5, 0.5, 30, jitter=0.0, sleep=slept.append)
     assert policy.execute(flaky) == "ok"
-    assert slept == [0.5, 1.0]         
+    assert slept == [0.5, 1.0]
 
 
 def test_gives_up():

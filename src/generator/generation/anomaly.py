@@ -10,6 +10,7 @@ class AnomalyKind(enum.StrEnum):
     CHEATER_RIVAL = "cheater_rival"
     BLACKOUT = "blackout"
 
+
 _ANOMALY_WEIGHTS = {
     AnomalyKind.ABANDONED: 0.50,
     AnomalyKind.CHEATER_ALLIES: 0.30,
@@ -17,9 +18,9 @@ _ANOMALY_WEIGHTS = {
     AnomalyKind.BLACKOUT: 0.05,
 }
 
-class AnomalyPolicy:
 
-    def __init__(self, probability: float, strength: float)->None:
+class AnomalyPolicy:
+    def __init__(self, probability: float, strength: float) -> None:
         self._probability = probability
         self._strength = strength
 
@@ -31,7 +32,7 @@ class AnomalyPolicy:
         if rng.random() >= self._probability:
             return None
         return rng.choices(
-          list(_ANOMALY_WEIGHTS),
-           weights=list(_ANOMALY_WEIGHTS.values()),
-           k=1,
+            list(_ANOMALY_WEIGHTS),
+            weights=list(_ANOMALY_WEIGHTS.values()),
+            k=1,
         )[0]

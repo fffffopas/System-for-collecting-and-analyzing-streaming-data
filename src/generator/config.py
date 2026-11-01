@@ -7,9 +7,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class ClickHouseSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="CLICKHOUSE_", env_file=".env",
+        env_prefix="CLICKHOUSE_",
+        env_file=".env",
         extra="ignore",
-        case_sensetive=False #sentension -> sensetive
+        case_sensetive=False,  # sentension -> sensetive
     )
 
     host: str = Field(default="127.0.0.1")
@@ -18,11 +19,13 @@ class ClickHouseSettings(BaseSettings):
     password: str = Field(default="")
     database: str = Field(default="default")
 
+
 class GeneratorSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="GENERATOR_", env_file=".env",
+        env_prefix="GENERATOR_",
+        env_file=".env",
         extra="ignore",
-        сase_sensetive=False #sentension -> sensetive
+        сase_sensetive=False,  # sentension -> sensetive
     )
 
     batch_size: int = Field(default=1000, ge=1)
@@ -32,18 +35,20 @@ class GeneratorSettings(BaseSettings):
     anomaly_probability: float = Field(default=0.02, ge=0.0, le=1.0)
     anomaly_strength: float = Field(default=1.0, ge=0.0, le=1.0)
 
-    log_level: str = Field(default="INFO") # info -> INFO
+    log_level: str = Field(default="INFO")  # info -> INFO
 
     retry_max_attempts: int = Field(default=5, ge=1)
     retry_base_delay: float = Field(default=0.5, ge=0.0)
     retry_max_delay: float = Field(default=30.0, ge=0.0)
     retry_backoff_factor: float = Field(default=2.0, ge=1.0)
 
+
 @dataclass(frozen=True, slots=True)
 class Settings:
     generator: GeneratorSettings
     clickhouse: ClickHouseSettings
 
+
 @lru_cache
 def get_settings() -> Settings:
-    return Settings(generator=GeneratorSettings(), clickhouse=ClickHouseSettings()) 
+    return Settings(generator=GeneratorSettings(), clickhouse=ClickHouseSettings())
