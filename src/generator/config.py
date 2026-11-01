@@ -34,8 +34,8 @@ class GeneratorSettings(BaseSettings):
     log_level: str = Field(default="INFO") # info -> INFO
 
     retry_max_attempts: int = Field(default=5, ge=1)
-    retru_base_delay: float = Field(default=0.5, ge=0.0)
-    retru_max_delay: float = Field(default=30.0, ge=0.0)
+    retry_base_delay: float = Field(default=0.5, ge=0.0)
+    retry_max_delay: float = Field(default=30.0, ge=0.0)
     retry_backoff_factor: float = Field(default=2.0, ge=1.0)
 
 @dataclass(frozen=True, slots=True)

@@ -9,7 +9,8 @@ from generator.models import Player, Hero, TableFacts
 from .anomaly import AnomalyKind, AnomalyPolicy
 from .metrics import (
     DotaProfile,
-    MmrBeforeSample,
+    SideSampler,
+    RoleSampler,
     MmrDeltaSample,
     ResultsSample,
     KillsSample,
@@ -22,7 +23,7 @@ from .metrics import (
     MetricSampler
 )
 
-class MathcGenereator:
+class MatchGenerator: # Mathc -> Match
     def __init__(
         self, 
         profile: DotaProfile,
@@ -34,7 +35,10 @@ class MathcGenereator:
         self._rng = rng
         self._anomaly_policy = anomaly_policy
 
-        self._mmr_before: MetricSampler = MmrBeforeSample(profile)
+        self._current_mmr: dict[int, int] = {}
+
+        self._side: MetricSampler = SideSampler(profile)
+        self._role: MetricSampler = RoleSampler(profile)
         self._result: MetricSampler = ResultsSample(profile)
         self._kills: MetricSampler = KillsSample(profile)
         self._deaths: MetricSampler = DeathsSample(profile)
@@ -46,14 +50,14 @@ class MathcGenereator:
 
         self._next_match_id = 1
 
-    def generator(self, player: Player, hero: Hero, at: datetime) -> TableFacts:
+    def generate(self, player: Player, hero: Hero, at: datetime) -> TableFacts: # generator -> generate
         
         rng = self._rng
         anomaly = self._anomaly_policy.decide(self._rng)
 
         ctx = MatchContext(at=at, player=player, hero=hero)
-        
-        ctx.mmr_before = self._mmr_before.sample(ctx, rng)
+        ctx.side       = self._side.sample(ctx, rng)
+        ctx.role       = self._role.sample(ctx, rng)
         ctx.result     = self._result.sample(ctx, rng)
         ctx.kills      = self._kills.sample(ctx, rng)
         ctx.deaths     = self._deaths.sample(ctx, rng)
@@ -65,14 +69,16 @@ class MathcGenereator:
 
         match_id = self._next_match_id
         self._next_match_id += 1
-
+        player.mmr = max(0, player.mmr + ctx.mmr_delta)
+        
         return TableFacts(
             match_id=match_id,
             player_id=player.player_id,
             hero_id=hero.hero_id,
+            side=ctx.side,
+            role=ctx.role,
             match_time=ctx.match_time,
             result=ctx.result,
-            mmr_before=ctx.mmr_before,
             mmr_delta=ctx.mmr_delta,
             gpm=ctx.gpm,
             xpm=ctx.xpm,
