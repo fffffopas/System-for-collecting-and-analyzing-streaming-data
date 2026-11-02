@@ -2,33 +2,30 @@ from __future__ import annotations
 
 import random
 from datetime import datetime
-from dataclasses import replace
 
-from generator.models import Player, Hero, TableFacts
+from generator.models import Hero, Player, TableFacts
 
 from .anomaly import AnomalyKind, AnomalyPolicy
 from .metrics import (
+    AssistsSample,
+    DeathsSample,
     DotaProfile,
-    SideSampler,
-    RoleSampler,
+    GpmSampler,
+    KillsSample,
+    MatchContext,
+    MatchTimeSampler,
+    MetricSampler,
     MmrDeltaSample,
     ResultsSample,
-    KillsSample,
-    DeathsSample,
-    AssistsSample,
-    GpmSampler,
+    RoleSampler,
+    SideSampler,
     XpmSampler,
-    MatchTimeSampler,
-    MatchContext,
-    MetricSampler
 )
 
-class MatchGenerator: # Mathc -> Match
+
+class MatchGenerator:  # Mathc -> Match
     def __init__(
-        self, 
-        profile: DotaProfile,
-        anomaly_policy: AnomalyPolicy,
-        rng: random.Random
+        self, profile: DotaProfile, anomaly_policy: AnomalyPolicy, rng: random.Random
     ) -> None:
 
         self._profile = profile
@@ -50,27 +47,29 @@ class MatchGenerator: # Mathc -> Match
 
         self._next_match_id = 1
 
-    def generate(self, player: Player, hero: Hero, at: datetime) -> TableFacts: # generator -> generate
-        
+    def generate(
+        self, player: Player, hero: Hero, at: datetime
+    ) -> TableFacts:  # generator -> generate
+
         rng = self._rng
         anomaly = self._anomaly_policy.decide(self._rng)
 
         ctx = MatchContext(at=at, player=player, hero=hero)
-        ctx.side       = self._side.sample(ctx, rng)
-        ctx.role       = self._role.sample(ctx, rng)
-        ctx.result     = self._result.sample(ctx, rng)
-        ctx.kills      = self._kills.sample(ctx, rng)
-        ctx.deaths     = self._deaths.sample(ctx, rng)
-        ctx.assists    = self._assists.sample(ctx, rng)
-        ctx.mmr_delta  = self._mmr_delta.sample(ctx, rng)
-        ctx.gpm        = self._gpm.sample(ctx, rng)
-        ctx.xpm        = self._xpm.sample(ctx, rng)
+        ctx.side = self._side.sample(ctx, rng)
+        ctx.role = self._role.sample(ctx, rng)
+        ctx.result = self._result.sample(ctx, rng)
+        ctx.kills = self._kills.sample(ctx, rng)
+        ctx.deaths = self._deaths.sample(ctx, rng)
+        ctx.assists = self._assists.sample(ctx, rng)
+        ctx.mmr_delta = self._mmr_delta.sample(ctx, rng)
+        ctx.gpm = self._gpm.sample(ctx, rng)
+        ctx.xpm = self._xpm.sample(ctx, rng)
         ctx.match_time = self._match_time.sample(ctx, rng)
 
         match_id = self._next_match_id
         self._next_match_id += 1
         player.mmr = max(0, player.mmr + ctx.mmr_delta)
-        
+
         return TableFacts(
             match_id=match_id,
             player_id=player.player_id,
@@ -91,7 +90,3 @@ class MatchGenerator: # Mathc -> Match
             commend_received=False,
             entered_low_priority=False,
         )
-
-
-
-        

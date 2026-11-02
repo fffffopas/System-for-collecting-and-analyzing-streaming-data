@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .env
 try_ch.
+.ruff_cache/
+.pytest_cache/
