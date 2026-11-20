@@ -31,6 +31,8 @@ class GeneratorSettings(BaseSettings):
     batch_size: int = Field(default=1000, ge=1)
     interval_seconds: float = Field(default=1.0, ge=0.0)
     seed: int = Field(default=42)
+    players_count: int = Field(default=500, ge=1)
+
 
     anomaly_probability: float = Field(default=0.02, ge=0.0, le=1.0)
     anomaly_strength: float = Field(default=1.0, ge=0.0, le=1.0)
