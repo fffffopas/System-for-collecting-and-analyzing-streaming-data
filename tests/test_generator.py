@@ -47,3 +47,16 @@ def test_mmr_changes_after_match():
     before = p.mmr
     f = gen.generate(p, HERO, NOW)
     assert p.mmr == max(0, before + f.mmr_delta)
+
+
+def test_event_time_is_taken_from_call():
+    f = make_gen().generate(make_player(), HERO, NOW)
+    assert f.event_time == NOW
+
+
+def test_match_ids_start_from_given_value():
+    gen = MatchGenerator(
+        DotaProfile(), AnomalyPolicy(0.02, 1.0), random.Random(1), start_match_id=100
+    )
+    p = make_player()
+    assert [gen.generate(p, HERO, NOW).match_id for _ in range(3)] == [100, 101, 102]
