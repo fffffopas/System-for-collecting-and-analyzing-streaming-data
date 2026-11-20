@@ -49,7 +49,7 @@ class MatchGenerator:  # Mathc -> Match
         self._xpm: MetricSampler = XpmSampler(profile)
         self._match_time: MetricSampler = MatchTimeSampler(profile)
 
-        self._next_match_id = 1
+        self._next_match_id = start_match_id
 
     def generate(
         self, player: Player, hero: Hero, at: datetime
