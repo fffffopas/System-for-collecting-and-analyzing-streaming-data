@@ -25,7 +25,11 @@ from .metrics import (
 
 class MatchGenerator:  # Mathc -> Match
     def __init__(
-        self, profile: DotaProfile, anomaly_policy: AnomalyPolicy, rng: random.Random
+        self, 
+        profile: DotaProfile,
+        anomaly_policy: AnomalyPolicy, 
+        rng: random.Random,
+        start_match_id: int = 1,
     ) -> None:
 
         self._profile = profile
@@ -72,6 +76,7 @@ class MatchGenerator:  # Mathc -> Match
 
         return TableFacts(
             match_id=match_id,
+            event_time=at,
             player_id=player.player_id,
             hero_id=hero.hero_id,
             side=ctx.side,
