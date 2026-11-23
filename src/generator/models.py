@@ -21,6 +21,7 @@ class Hero:
 @dataclass(frozen=True, slots=True)
 class TableFacts:
     match_id: int
+    event_time: datetime
     player_id: int
     hero_id: int
 

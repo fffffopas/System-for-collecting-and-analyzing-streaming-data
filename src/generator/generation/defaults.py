@@ -11,7 +11,35 @@ REGION_MMR_MEAN: dict[str, int] = {
     "SA": 2800,
     "CIS": 3300,
 }
-print(list(REGION_MMR_MEAN))
+
+# Границы MMR игрока (при генерации игроков и при обновлении после матча).
+MMR_MIN = 0
+MMR_MAX = 14000
+
+# Страны игроков по регионам: {регион: {код страны ISO 3166-1 alpha-2: вес}}.
+# Вес - относительная доля игроков региона из этой страны (не обязан давать сумму 1).
+# Набор регионов должен совпадать с REGION_MMR_MEAN (проверяется тестом).
+COUNTRY_WEIGHTS_BY_REGION: dict[str, dict[str, float]] = {
+    "EU": {
+        "DE": 0.22,
+        "FR": 0.14,
+        "PL": 0.12,
+        "GB": 0.10,
+        "ES": 0.09,
+        "SE": 0.08,
+        "IT": 0.07,
+        "NL": 0.06,
+        "FI": 0.04,
+        "RO": 0.04,
+        "DK": 0.04,
+    },
+    "NA": {"US": 0.80, "CA": 0.20},
+    "SEA": {"SG": 0.15, "MY": 0.20, "TH": 0.18, "PH": 0.20, "ID": 0.17, "VN": 0.10},
+    "CN": {"CN": 0.90, "HK": 0.04, "TW": 0.06},
+    "SA": {"BR": 0.55, "AR": 0.14, "CL": 0.10, "PE": 0.11, "CO": 0.10},
+    "CIS": {"RU": 0.50, "UA": 0.18, "KZ": 0.14, "BY": 0.08, "UZ": 0.06, "GE": 0.04},
+}
+DEFAULT_COUNTRY = "XX"
 
 ROLE_KILLS_BASE: dict[str, float] = {
     "carry": 9.0,
@@ -190,17 +218,145 @@ HERO_ARCHETYPE: dict[str, str] = {
 SIDES = ("radiant", "dire")
 SIDE_WIN_BONUS: dict[str, float] = {"radiant": 0.01, "dire": -0.01}
 
+# Бонус к винрейту героя относительно «среднего героя» меты.
+#
+# Источник: DotaPicker (https://dotapicker.com/pubmeta), патч 7.41, срез от 15.11.2026,
+# ranked All Pick, весь матч, среднее по трём группам рейтинга (Normal/High/Very High).
+# Формула: (винрейт героя - средний винрейт по всем героям) / 100.
+# Среднее по мете ≈ 49.43%, поэтому центрируем на него, а не на 50%: иначе у синтетических
+# данных общий винрейт «поплыл» бы вниз (~49%). Сумма бонусов ≈ 0.
+# В комментарии справа - исходный винрейт героя в мете. Отсортировано от сильных к слабым.
+# При смене патча: обновить значения и дату выше (пересчитать по таблице меты).
 HERO_WINRATE_BONUS: dict[str, float] = {
-    "Anti-Mage": -0.01,
-    "Juggernaut": 0.02,
-    "Axe": 0.01,
-    "Pudge": -0.01,
-    "Crystal Maiden": 0.00,
-    "Invoker": -0.02,
-    "Io": 0.02,
-    "Treant Protector": 0.02,
-    "Medusa": -0.01,
+    "Wraith King": +0.053,  # 54.7%
+    "Meepo": +0.047,  # 54.1%
+    "Visage": +0.044,  # 53.8%
+    "Outworld Destroyer": +0.038,  # 53.2%
+    "Riki": +0.037,  # 53.1%
+    "Spectre": +0.036,  # 53.0%
+    "Juggernaut": +0.034,  # 52.8%
+    "Nyx Assassin": +0.033,  # 52.7%
+    "Phantom Lancer": +0.033,  # 52.7%
+    "Arc Warden": +0.032,  # 52.6%
+    "Dragon Knight": +0.032,  # 52.6%
+    "Bounty Hunter": +0.031,  # 52.5%
+    "Legion Commander": +0.031,  # 52.5%
+    "Lich": +0.031,  # 52.5%
+    "Grimstroke": +0.029,  # 52.3%
+    "Dawnbreaker": +0.028,  # 52.2%
+    "Phoenix": +0.027,  # 52.1%
+    "Vengeful Spirit": +0.027,  # 52.1%
+    "Witch Doctor": +0.027,  # 52.1%
+    "Night Stalker": +0.026,  # 52.0%
+    "Spirit Breaker": +0.026,  # 52.0%
+    "Bloodseeker": +0.024,  # 51.8%
+    "Shadow Shaman": +0.022,  # 51.6%
+    "Enigma": +0.021,  # 51.5%
+    "Lifestealer": +0.021,  # 51.5%
+    "Mirana": +0.021,  # 51.5%
+    "Sven": +0.021,  # 51.5%
+    "Ancient Apparition": +0.020,  # 51.4%
+    "Troll Warlord": +0.020,  # 51.4%
+    "Abaddon": +0.019,  # 51.3%
+    "Leshrac": +0.019,  # 51.3%
+    "Omniknight": +0.019,  # 51.3%
+    "Brewmaster": +0.018,  # 51.2%
+    "Crystal Maiden": +0.018,  # 51.2%
+    "Dazzle": +0.018,  # 51.2%
+    "Pudge": +0.018,  # 51.2%
+    "Anti-Mage": +0.017,  # 51.1%
+    "Invoker": +0.017,  # 51.1%
+    "Techies": +0.015,  # 50.9%
+    "Chaos Knight": +0.014,  # 50.8%
+    "Elder Titan": +0.013,  # 50.7%
+    "Pugna": +0.013,  # 50.7%
+    "Earthshaker": +0.012,  # 50.6%
+    "Phantom Assassin": +0.012,  # 50.6%
+    "Disruptor": +0.011,  # 50.5%
+    "Necrophos": +0.011,  # 50.5%
+    "Broodmother": +0.009,  # 50.3%
+    "Clinkz": +0.009,  # 50.3%
+    "Luna": +0.009,  # 50.3%
+    "Oracle": +0.007,  # 50.1%
+    "Razor": +0.007,  # 50.1%
+    "Io": +0.006,  # 50.0%
+    "Ogre Magi": +0.006,  # 50.0%
+    "Silencer": +0.006,  # 50.0%
+    "Axe": +0.005,  # 49.9%
+    "Undying": +0.005,  # 49.9%
+    "Zeus": +0.005,  # 49.9%
+    "Dark Seer": +0.003,  # 49.7%
+    "Marci": +0.003,  # 49.7%
+    "Primal Beast": +0.003,  # 49.7%
+    "Slark": +0.003,  # 49.7%
+    "Keeper of the Light": +0.002,  # 49.6%
+    "Skywrath Mage": +0.002,  # 49.6%
+    "Void Spirit": +0.002,  # 49.6%
+    "Warlock": +0.002,  # 49.6%
+    "Rubick": +0.001,  # 49.5%
+    "Winter Wyvern": +0.001,  # 49.5%
+    "Bane": +0.000,  # 49.4%
+    "Lone Druid": +0.000,  # 49.4%
+    "Lycan": +0.000,  # 49.4%
+    "Naga Siren": +0.000,  # 49.4%
+    "Earth Spirit": -0.001,  # 49.3%
+    "Magnus": -0.001,  # 49.3%
+    "Snapfire": -0.002,  # 49.2%
+    "Dark Willow": -0.003,  # 49.1%
+    "Kunkka": -0.003,  # 49.1%
+    "Sniper": -0.003,  # 49.1%
+    "Sand King": -0.004,  # 49.0%
+    "Centaur Warrunner": -0.005,  # 48.9%
+    "Slardar": -0.005,  # 48.9%
+    "Medusa": -0.006,  # 48.8%
+    "Ursa": -0.006,  # 48.8%
+    "Venomancer": -0.006,  # 48.8%
+    "Ember Spirit": -0.007,  # 48.7%
+    "Tidehunter": -0.007,  # 48.7%
+    "Death Prophet": -0.008,  # 48.6%
+    "Lion": -0.009,  # 48.5%
+    "Viper": -0.009,  # 48.5%
+    "Faceless Void": -0.010,  # 48.4%
+    "Largo": -0.010,  # 48.4%
+    "Ringmaster": -0.010,  # 48.4%
+    "Doom": -0.012,  # 48.2%
+    "Windranger": -0.012,  # 48.2%
+    "Jakiro": -0.013,  # 48.1%
+    "Tusk": -0.014,  # 48.0%
+    "Mars": -0.015,  # 47.9%
+    "Clockwerk": -0.016,  # 47.8%
+    "Underlord": -0.016,  # 47.8%
+    "Morphling": -0.017,  # 47.7%
+    "Muerta": -0.017,  # 47.7%
+    "Tinker": -0.017,  # 47.7%
+    "Enchantress": -0.020,  # 47.4%
+    "Hoodwink": -0.021,  # 47.3%
+    "Queen of Pain": -0.021,  # 47.3%
+    "Weaver": -0.021,  # 47.3%
+    "Bristleback": -0.022,  # 47.2%
+    "Gyrocopter": -0.024,  # 47.0%
+    "Lina": -0.024,  # 47.0%
+    "Puck": -0.024,  # 47.0%
+    "Storm Spirit": -0.024,  # 47.0%
+    "Pangolier": -0.032,  # 46.2%
+    "Alchemist": -0.033,  # 46.1%
+    "Chen": -0.034,  # 46.0%
+    "Drow Ranger": -0.036,  # 45.8%
+    "Templar Assassin": -0.036,  # 45.8%
+    "Beastmaster": -0.038,  # 45.6%
+    "Huskar": -0.038,  # 45.6%
+    "Monkey King": -0.038,  # 45.6%
+    "Timbersaw": -0.039,  # 45.5%
+    "Kez": -0.040,  # 45.4%
+    "Treant Protector": -0.040,  # 45.4%
+    "Terrorblade": -0.045,  # 44.9%
+    "Tiny": -0.049,  # 44.5%
+    "Shadow Demon": -0.050,  # 44.4%
+    "Batrider": -0.051,  # 44.3%
+    "Nature's Prophet": -0.064,  # 43.0%
+    "Shadow Fiend": -0.067,  # 42.7%
 }
+
 DEFAULT_HERO_WINRATE_BONUS = 0.0
 
 OVERRIDES: dict[str, tuple[float, float]] = {

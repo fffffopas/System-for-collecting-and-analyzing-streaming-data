@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
 class ClickHouseSettings(BaseSettings):
@@ -31,16 +33,31 @@ class GeneratorSettings(BaseSettings):
     batch_size: int = Field(default=1000, ge=1)
     interval_seconds: float = Field(default=1.0, ge=0.0)
     seed: int = Field(default=42)
+    players_count: int = Field(default=500, ge=1)
 
     anomaly_probability: float = Field(default=0.02, ge=0.0, le=1.0)
     anomaly_strength: float = Field(default=1.0, ge=0.0, le=1.0)
 
+    dry_run: bool = Field(default=False)  # Режим без записи в БД
     log_level: str = Field(default="INFO")  # info -> INFO
 
     retry_max_attempts: int = Field(default=5, ge=1)
     retry_base_delay: float = Field(default=0.5, ge=0.0)
     retry_max_delay: float = Field(default=30.0, ge=0.0)
     retry_backoff_factor: float = Field(default=2.0, ge=1.0)
+
+    """
+    Валидатор log_level. Проверяет правильность level 
+    и переводит его в верхний регистр 
+    """
+
+    @field_validator("log_level")
+    @classmethod
+    def _normalize_log_level(cls, value: str) -> str:
+        level = value.strip().upper()
+        if level not in LOG_LEVELS:
+            raise ValueError(f"log_level должен быть одним из {LOG_LEVELS}")
+        return level
 
 
 @dataclass(frozen=True, slots=True)

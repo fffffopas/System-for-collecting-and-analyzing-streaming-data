@@ -90,7 +90,7 @@ class MatchContext:
     anomaly: AnomalyKind | None = None
 
 
-def _clamp(value: float, low: float, high: float) -> float:
+def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
@@ -131,7 +131,7 @@ class ResultsSample(MetricSampler):
         base_winrate += self._profile.hero_winrate_bonus.get(
             ctx.hero.hero_name, defaults.DEFAULT_HERO_WINRATE_BONUS
         )
-        base_winrate = _clamp(base_winrate, 0.05, 0.95)
+        base_winrate = clamp(base_winrate, 0.05, 0.95)
         return rng.random() < base_winrate
 
 
@@ -183,7 +183,7 @@ class MmrDeltaSample(MetricSampler):
 
         kda = (ctx.kills + ctx.assists) / max(1, ctx.deaths)
 
-        kda_factor = _clamp((kda - 3.0) / 3.0, -1.0, 1.0)  # [-1, 1]
+        kda_factor = clamp((kda - 3.0) / 3.0, -1.0, 1.0)  # [-1, 1]
         kda_bonus = kda_factor * self._profile.kda_bonus_max
 
         if not ctx.result:
@@ -201,7 +201,7 @@ class GpmSampler(MetricSampler):
         base = self._profile.hero_gpm_mean.get(ctx.hero.hero_name, defaults.DEFAULT_GPM)
         win_bonus = 50.0 if ctx.result else 0.0
         noise = rng.gauss(0, self._profile.gpm_noise_std)
-        return round(_clamp(base + win_bonus + noise, 50.0, 1500.0), 1)
+        return round(clamp(base + win_bonus + noise, 50.0, 1500.0), 1)
 
 
 class XpmSampler(MetricSampler):
@@ -212,7 +212,7 @@ class XpmSampler(MetricSampler):
         base = self._profile.hero_xpm_mean.get(ctx.hero.hero_name, defaults.DEFAULT_XPM)
         win_bonus = 50.0 if ctx.result else 0.0
         noise = rng.gauss(0, self._profile.xpm_noise_std)
-        return round(_clamp(base + win_bonus + noise, 50.0, 1500.0), 1)
+        return round(clamp(base + win_bonus + noise, 50.0, 1500.0), 1)
 
 
 class MatchTimeSampler(MetricSampler):
@@ -225,7 +225,7 @@ class MatchTimeSampler(MetricSampler):
 
         noise = rng.gauss(0, self._profile.match_time_std_min)
 
-        minutes = _clamp(
+        minutes = clamp(
             base + win_bonus + noise,
             self._profile.match_time_min_min,  # 20
             self._profile.match_time_max_min,  # 90
