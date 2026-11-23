@@ -1,7 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-
 from generator.models import Hero, Player, TableFacts
 from generator.retry import RetryError, RetryPolicy
 from generator.storage import (

@@ -1,7 +1,6 @@
 import pytest
-from pydantic import ValidationError
-
 from generator.config import GeneratorSettings
+from pydantic import ValidationError
 
 
 def test_defaults(monkeypatch):

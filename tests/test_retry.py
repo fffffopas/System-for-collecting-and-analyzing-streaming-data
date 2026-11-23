@@ -1,5 +1,4 @@
 import pytest
-
 from generator.retry import RetryError, RetryPolicy
 
 
