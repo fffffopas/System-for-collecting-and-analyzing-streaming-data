@@ -29,7 +29,11 @@ class RecordingSink:
 
 def make_settings(**overrides):
     generator = GeneratorSettings(
-        _env_file=None, batch_size=5, interval_seconds=0.0, players_count=10, **overrides
+        _env_file=None,
+        batch_size=5,
+        interval_seconds=0.0,
+        players_count=10,
+        **overrides,
     )
     return Settings(generator=generator, clickhouse=ClickHouseSettings(_env_file=None))
 

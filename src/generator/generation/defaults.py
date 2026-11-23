@@ -39,7 +39,7 @@ COUNTRY_WEIGHTS_BY_REGION: dict[str, dict[str, float]] = {
     "SA": {"BR": 0.55, "AR": 0.14, "CL": 0.10, "PE": 0.11, "CO": 0.10},
     "CIS": {"RU": 0.50, "UA": 0.18, "KZ": 0.14, "BY": 0.08, "UZ": 0.06, "GE": 0.04},
 }
-DEFAULT_COUNTRY = "XX" 
+DEFAULT_COUNTRY = "XX"
 
 ROLE_KILLS_BASE: dict[str, float] = {
     "carry": 9.0,

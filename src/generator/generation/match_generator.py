@@ -25,9 +25,9 @@ from .metrics import (
 
 class MatchGenerator:  # Mathc -> Match
     def __init__(
-        self, 
+        self,
         profile: DotaProfile,
-        anomaly_policy: AnomalyPolicy, 
+        anomaly_policy: AnomalyPolicy,
         rng: random.Random,
         start_match_id: int = 1,
     ) -> None:
