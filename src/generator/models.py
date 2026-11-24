@@ -42,3 +42,7 @@ class TableFacts:
     report_received: bool
     commend_received: bool
     entered_low_priority: bool
+
+    @property
+    def key(self) -> tuple[int, int]:
+        return (self.match_id, self.player_id)
